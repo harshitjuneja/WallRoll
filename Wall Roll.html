@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+  <head>
+      <title>Die-roll</title>
+  </head>
+  <body>
+      <script type = text/javascript src = "js/phaser.min.js"></script>
+      <script type = text/javascript>
+          var game = new Phaser.Game(640,520,Phaser.AUTO,'',{
+              preload : preload,
+              create : create,
+              update : update
+          })
+          
+          function preload(){
+              game.load.image('bg','assets/bg.png');
+              game.load.image('hgl','assets/hgl.png');
+              game.load.image('vgl','assets/vgl.png');
+              game.load.spritesheet('die','assets/dicesheet.png',66.4,66.4);
+              
+          }
+          
+          var idie,frame;
+          function create(){
+              
+              game.physics.startSystem(Phaser.Physics.ARCADE);  // start phaser's arcade physics
+              
+              
+              game.add.sprite(0,0,'bg');                        // adding background 'bg' to game area
+              
+              frame = game.add.group();                         //  made a group = frame
+              frame.enableBody = true;                          //  enable physics on group frame
+             
+              var line_v1 = frame.create(0,513,'hgl');           // line_v1 is a vertical line and a frame member
+              line_v1.body.immovable = true;
+              var line_v2 = frame.create(0,0,'hgl');             
+              line_v2.body.immovable = true; 
+              var line_h1 = frame.create(0,0,'vgl');             // line_h1 is a horizontal line and a frame member
+              line_h1.body.immovable = true;
+              var line_h2 = frame.create(632,0,'vgl');
+              line_h2.body.immovable = true;                      
+                                    
+              var fno = Math.floor((Math.random() * 6));         // get fno in bteween (0-5)
+              
+              timer = game.add.text(505, 19, '00:00' ,{font : "15px Arial" , fill : "white"});         //Adding timer text to game area
+              myscore = game.add.text(90, 19 , '000' , {font : "15px Arial" , fill : "white"});        //Adding score text field
+              mylevel = game.add.text(312, 19 , '01' , {font : "15px Arial" , fill : "white"});        //Adding level text field
+             
+                            
+              idie = game.add.sprite(30,game.world.height-150,'die');                //adding die to game area
+              game.physics.arcade.enable(idie);                                     // enabling phsics on die
+              idie.body.collideWorldBounds = true;
+              idie.body.bounce.y = 1;
+              idie.body.bounce.x = 1;
+                 
+              idie.animations.add('touch_bounds',[fno],1,false);                    // adding animations to the die
+              
+              
+              idie.body.velocity.y = -250;                                           // die movement
+              idie.body.velocity.x = 150;
+              
+          }
+          
+          function update(){
+              game.physics.arcade.collide(idie,frame);                             // allow die and frames to collide
+              updateTimer();                                     
+             
+          }
+          
+          
+          //The following variables and function will be used to take control over the timer
+          var timer;
+          var totalSeconds = 0;
+          var gameSeconds = 0;
+          var timePaused = 0;
+          var timeUpdateFlag = 1;
+          var pauseState = 0;
+          var finishFlag = 0;
+
+          var startGame = 1; //To be changed to zero after we include startinggame function.
+          
+          var timeText;
+          // The userdefined function to update the timer.
+          function updateTimer()
+          {
+            if(startGame === 1)
+            {
+            //To find and display the elapsed time.
+            if(pauseState === 0)
+            {
+              if(timeUpdateFlag === 0)
+              {
+                timeUpdateFlag = 1;
+                timePaused = timePaused + (Math.floor(game.time.totalElapsedSeconds())-totalSeconds);
+              }
+              totalSeconds=Math.floor(game.time.totalElapsedSeconds());
+              gameSeconds = totalSeconds - timePaused;
+              var minutes = Math.floor(gameSeconds / 60);
+              var hours = Math.floor(minutes/60);
+              var modmin = minutes%60;
+              if (modmin < 10)
+              {
+                modmin = '0' + modmin;
+              }
+              var modsec = gameSeconds % 60;
+              if (modsec < 10)
+              {
+                modsec = '0' + modsec;
+              }
+              //Hour display in two digits ! will be like 002.
+              timeText = '0'+hours+':'+modmin+ ':' + modsec ;
+              timer.setText(timeText);
+            }
+            else
+            {
+              timeUpdateFlag = 0;
+            }
+            if(gameSeconds > 59)
+              {
+                if(finishFlag === 0)
+                  {
+                    /*document.getElementById("finishButtonArea").innerHTML = '<paper-ripple></paper-ripple><paper-button raised style="color:#e91e63" onclick="finishGame()">Click here to finish the game</paper-button>';*/
+                    finishFlag = 1;
+                  }
+              }
+            }
+          }
+          
+          
+          
+      </script>
+  </body>
+</html>
